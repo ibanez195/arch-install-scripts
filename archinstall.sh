@@ -9,51 +9,65 @@ parts=$(fdisk -l | grep -e "^/dev/" | awk '{print $1}')
 let partcount=$(echo $parts | wc -w)
 let partcount=$partcount+1
 
-# Generate whiptail menu for partition formatting
+# Generate whiptail menu command for partition formatting
 partmenu="whiptail --menu --noitem \"Pick a partition to format\" 15 50 $partcount"
 for x in $parts; do
-	partmenu="$partmenu \"$x\" \"\""
+		partmenu="$partmenu \"$x\" \"\""
 done
 partmenu="$partmenu \"done\" \"\""
 
-# Ask user for formatting preferences until done is selected
+# Ask user for formatting preferences until done or cancel are selected
 menuchoice=$(eval $partmenu 3>&1 1>&2 2>&3)
 
 while [[ $menuchoice != "done" ]]; do
-	fs=$(whiptail --menu --noitem "How would you like to format $menuchoice?" 10 50 5 "ext2" "" "ext3" "" "ext4" "" "vfat" "" "xfs" "" 3>&1 1>&2 2>&3)
-	eval "mkfs.$fs $menuchoice"
-	menuchoice=$(eval $partmenu 3>&1 1>&2 2>&3)
+		if [[ $menuchoice = "" ]]; then
+				echo "Install aborted by user"
+				exit 0
+		fi
+		fs=$(whiptail --menu --noitem "How would you like to format $menuchoice?" 10 50 5 "ext2" "" "ext3" "" "ext4" "" "vfat" "" "xfs" "" 3>&1 1>&2 2>&3)
+		eval "mkfs.$fs $menuchoice"
+		menuchoice=$(eval $partmenu 3>&1 1>&2 2>&3)
 done
 
-# Format swap partition if present
+# Generate swap menu command
 swapmenu="whiptail --menu --noitem \"Pick a partition to use as swap\" 15 50 $partcount"
 for x in $parts; do
-	swapmenu="$swapmenu \"$x\" \"\""
+		swapmenu="$swapmenu \"$x\" \"\""
 done
 swapmenu="$swapmenu \"no swap\" \"\""
 
+# Format swap partition if present
 swapmenuchoice=$(eval $swapmenu 3>&1 1>&2 2>&3)
 if [[ $swapmenuchoice != "done" ]]; then
-	mkswap $swapmenuchoice
-	swapon $swapmenuchoice
+		if [[ $swapmenuchoice = "" ]]; then
+				echo "Install aborted by user"
+				exit 0
+		fi
+		mkswap $swapmenuchoice
+		swapon $swapmenuchoice
 fi
 
-# Mount disk partitions
+# Generate partition mounting menu
 mountmenu="whiptail --menu --noitem \"Pick a partition to mount\" 15 50 $partcount"
 for x in $parts; do
-	mountmenu="$mountmenu \"$x\" \"\""
+		mountmenu="$mountmenu \"$x\" \"\""
 done
 mountmenu="$mountmenu \"done\" \"\""
 
+# Mount disk partitions
 mountmenuchoice=$(eval $mountmenu 3>&1 1>&2 2>&3)
 
 while [[ $mountmenuchoice != "done" ]]; do
-	location=$(whiptail --inputbox "Where would you like to mount $mountmenuchoice?" 10 50 3>&1 1>&2 2>&3)
-	if [ ! -d "/mnt/$location" ]; then
-		mkdir /mnt/$location
-	fi
-	mount $mountmenuchoice /mnt/$location
-	mountmenuchoice=$(eval $mountmenu 3>&1 1>&2 2>&3)
+		if [[ $mountmenuchoice = "" ]]; then
+				echo "Install aborted by user"
+				exit 0
+		fi
+		location=$(whiptail --inputbox "Where would you like to mount $mountmenuchoice?" 10 50 3>&1 1>&2 2>&3)
+		if [ ! -d "/mnt/$location" ]; then
+				mkdir /mnt/$location
+		fi
+		mount $mountmenuchoice /mnt/$location
+		mountmenuchoice=$(eval $mountmenu 3>&1 1>&2 2>&3)
 done
 
 # Install base system
