@@ -62,7 +62,14 @@ while [[ $mountmenuchoice != "done" ]]; do
 				echo "Install aborted by user"
 				exit 0
 		fi
+
 		location=$(whiptail --inputbox "Where would you like to mount $mountmenuchoice?" 10 50 3>&1 1>&2 2>&3)
+
+		if [[ $location = "" ]]; then
+				echo "Install aborted by user"
+				exit 0
+		fi
+
 		if [ ! -d "/mnt/$location" ]; then
 				mkdir /mnt/$location
 		fi
@@ -70,9 +77,9 @@ while [[ $mountmenuchoice != "done" ]]; do
 		mountmenuchoice=$(eval $mountmenu 3>&1 1>&2 2>&3)
 done
 
-# Install base system
+# Install base system and libnewt for whiptail menus
 whiptail --msgbox "Base packages for new system will now be installed" 10 40
-pacstrap /mnt base base-devel libnewt
+pacstrap /mnt base sudo libnewt
 
 # Generate fstab file
 genfstab -p /mnt >> /mnt/etc/fstab
