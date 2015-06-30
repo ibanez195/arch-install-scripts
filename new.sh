@@ -1,9 +1,10 @@
 #!/bin/bash
 
+# Obtain list of disk partitions
+parts=$(fdisk -l | grep -e "^/dev/" | awk '{print $1}')
+let partcount=$(echo $parts | wc -w)
+
 format_disks(){
-	# Obtain list of disk partitions
-	parts=$(fdisk -l | grep -e "^/dev/" | awk '{print $1}')
-	let partcount=$(echo $parts | wc -w)
 
 	# Generate whiptail menu command for partition formatting
 	partmenu="whiptail --menu --noitem \"Pick a partition to format\" 15 50 $partcount"
@@ -26,9 +27,59 @@ format_disks(){
 	done
 }
 
-#setup_swap(){}
-#mount_partitions(){}
-#install_base(){}
+setup_swap(){
+
+	# Generate swap menu command
+	swapmenu="whiptail --menu --noitem \"Pick a partition to use as swap\" 15 50 $partcount"
+	for x in $parts; do
+			swapmenu="$swapmenu \"$x\" \"\""
+	done
+	swapmenu="$swapmenu \"no swap\" \"\""
+	
+	# Format swap partition if present
+	swapmenuchoice=$(eval $swapmenu 3>&1 1>&2 2>&3)
+	if [[ $swapmenuchoice != "done" ]]; then
+			if [[ $swapmenuchoice = "" ]]; then
+					echo "Install aborted by user"
+					exit 0
+			fi
+			mkswap $swapmenuchoice
+			swapon $swapmenuchoice
+	fi
+}
+
+mount_partitions(){
+
+	# Generate partition mounting menu
+	mountmenu="whiptail --menu --noitem \"Pick a partition to mount\" 15 50 $partcount"
+	for x in $parts; do
+			mountmenu="$mountmenu \"$x\" \"\""
+	done
+	mountmenu="$mountmenu \"done\" \"\""
+	
+	# Mount disk partitions
+	mountmenuchoice=$(eval $mountmenu 3>&1 1>&2 2>&3)
+	
+	while [[ $mountmenuchoice != "done" ]]; do
+			if [[ $mountmenuchoice = "" ]]; then
+					echo "Install aborted by user"
+					exit 0
+			fi
+	
+			location=$(whiptail --inputbox "Where would you like to mount $mountmenuchoice?" 10 50 3>&1 1>&2 2>&3)
+	
+			if [[ $location = "" ]]; then
+					echo "Install aborted by user"
+					exit 0
+			fi
+	
+			if [ ! -d "/mnt/$location" ]; then
+					mkdir /mnt/$location
+			fi
+			mount $mountmenuchoice /mnt/$location
+			mountmenuchoice=$(eval $mountmenu 3>&1 1>&2 2>&3)
+	done
+}
 #set_hostname(){}
 #set_timezone(){}
 #set_locale(){}
@@ -73,7 +124,7 @@ while [[ $mainmenuchoice != "done" && $mainmenuchoice != "" ]]; do
 		"mount")
 				mount_partitions;;
 		"base")
-				install_base;;
+				pacstrap /mnt base libnewt sudo;;
 		"hostname")
 				set_hostname;;
 		"time")
