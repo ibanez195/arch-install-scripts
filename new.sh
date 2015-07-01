@@ -161,8 +161,8 @@ add_user(){
 			pass2="default2"
 
 			while [[ $pass1 != $pass2 || $pass1 == "" ]]; do
-				pass1=$(whiptail --menu "Please enter a password for user $user" 15 50 3>&1 1>&2 2>&3)
-				pass2=$(whiptail --menu "Please enter again" 15 50 3>&1 1>&2 2>&3)
+				pass1=$(whiptail --passwordbox "Please enter a password for user $user" 15 50 3>&1 1>&2 2>&3)
+				pass2=$(whiptail --passwordbox "Please enter again" 15 50 3>&1 1>&2 2>&3)
 				if [[ $pass1 != $pass2 ]]; then
 					whiptail --msgbox "Passwords do no match please try again" 15 50
 				elif [[ $pass1 == "" ]]; then
