@@ -76,8 +76,28 @@ set_hostname(){
 }
 
 set_timezone(){
-		whiptail --msgbox "Setting timezone to America/New_York"
-		arch-chroot /mnt ln -sf /usr/share/zoneinfo/America/New_York /etc/localtime
+		# construct command string for time region
+		timemenu="whiptail --menu \"Select a region\" 25 50 15"
+
+		for region in $(ls /usr/share/zoneinfo | xargs); do
+			timemenu="$timemenu \"$region\" \"\""
+		done
+
+		region=$(eval $timemenu 3>&1 1>&2 2>&3)	
+
+		# if user did not cancel construct command string for time zone
+		if [[ $region != "" ]]; then
+			submenu="whiptail --menu \"Select a timezone\" 25 50 15"
+			for zone in $(ls /usr/share/zoneinfo/$region | xargs); do
+				submenu="$submenu \"$zone\" \"\""
+			done
+
+			zone=$(eval $submenu 3>&1 1>&2 2>&3)
+			# if user did not cancel set timezone
+			if [[ $zone != "" ]]; then
+				arch-chroot /mnt ln -sf /usr/share/zoneinfo/$region/$zone /etc/localtime
+			fi
+		fi
 }
 
 set_locale(){
