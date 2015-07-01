@@ -234,6 +234,25 @@ install_desktop(){
 	arch-chroot /mnt pacman -S xorg-server xorg-server-utils xorg-xinit xorg-twm xorg-xclock xterm
 }
 
+install_helper(){
+	whiptail --msgbox "Note: Installation of an AUR helper requires installation of the base-devel package" 15 50
+	helpermenu="whiptail --menu --notag \"Select a AUR helper to install\" 15 50 5 \
+									\"aura\" \"Aura\" \
+									\"autoaur\" \"Autoaur\" \
+									\"cower\" \"Cower\" \
+									\"packer\" \"Packer\" \
+									\"yaourt\" \"Yaourt\" \
+	"
+	helper=$(eval $helpermenu 3>&1 1>&2 2>&3)
+	if [[ $helper != "" ]]; then
+		pacstrap /mnt base-devel wget
+		arch-chroot /mnt wget https://aur.archlinux.org/packages/$helper[1,2]/$helper/$helper.tar.gz
+		arch-chroot /mnt tar xzf $helper*.tar.gz
+		arch-chroot /mnt makepkg $helper/PKGBUILD
+		arch-chroot /mnt pacman -U $helper*.tar.xz
+	fi
+}
+
 get_partitions(){
 	# Obtain list of disk partitions
 	parts=$(fdisk -l | grep -e "^/dev/" | awk '{print $1}');
@@ -254,6 +273,7 @@ mainmenu="whiptail --menu --notags \"Arch Install Scripts\" 25 50 15 \
 			\"boot\" \"Install Bootloader\" \
 			\"drivers\" \"Install Graphics Drivers\" \
 			\"desktop\" \"Install Desktop Environment\" \
+			\"helper\" \"Install AUR Helper\"
 			\"done\" \"Finish Install and Exit Script\" \
 "
 
@@ -292,6 +312,8 @@ while [[ $mainmenuchoice != "done" && $mainmenuchoice != "" ]]; do
 		install_drivers;;
 	"desktop")
 		install_desktop;;
+	"helper")
+		install_helper;;
 	"done")
 		arch-chroot /mnt mkinitcpio -p linux;;
 	esac
