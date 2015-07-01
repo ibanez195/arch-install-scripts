@@ -83,6 +83,8 @@ set_timezone(){
 set_locale(){
 		whiptail --msgbox "Uncomment the locale you wish to use in /etc/locale.gen" 15 50
 		arch-chroot /mnt vi /etc/locale.gen
+		arch-chroot /mnt locale-gen
+		arch-chroot /mnt echo $(locale | grep LANG) > /etc/locale.conf
 }
 
 set_root_passwd(){
@@ -105,7 +107,7 @@ set_root_passwd(){
 
 add_user(){
 		user=$(whiptail --inputbox "Enter a new username" 15 50 3>&1 1>&2 2>&3)
-		groups=$(whiptail --inputbox "Enter any secondary groups you would like the new user to be in" 3>&1 1>&2 2>&3)
+		groups=$(whiptail --inputbox "Enter any secondary groups you would like the new user to be in" 15 50 3>&1 1>&2 2>&3)
 
 		if [[ $groups != "" ]]; then
 				arch-chroot /mnt useradd -m -G $groups $user
