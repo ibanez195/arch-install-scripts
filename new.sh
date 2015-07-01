@@ -207,21 +207,22 @@ get_partitions(){
 #TODO: clean up main menu command definition
 
 # Create string of command for main menu
-mainmenu="whiptail --menu --notags \"Arch Install Scripts\" 25 50 15"
-mainmenu="$mainmenu \"part\" \"Partition Disk(s)\""
-mainmenu="$mainmenu \"format\" \"Format Partitions\""
-mainmenu="$mainmenu \"swap\" \"Setup Swap\""
-mainmenu="$mainmenu \"mount\" \"Mount Paritions\""
-mainmenu="$mainmenu \"base\" \"Install Base System\""
-mainmenu="$mainmenu \"hostname\" \"Set Hostname\""
-mainmenu="$mainmenu \"time\" \"Set Timezone\""
-mainmenu="$mainmenu \"locale\" \"Set Locale\""
-mainmenu="$mainmenu \"root\" \"Set Root Password\""
-mainmenu="$mainmenu \"users\" \"Add User(s)\""
-mainmenu="$mainmenu \"boot\" \"Install Bootloader\""
-mainmenu="$mainmenu \"drivers\" \"Install Graphics Drivers\""
-mainmenu="$mainmenu \"desktop\" \"Install Desktop Environment\""
-mainmenu="$mainmenu \"done\" \"Finish Install and Exit Script\""
+mainmenu="whiptail --menu --notags \"Arch Install Scripts\" 25 50 15 \
+			\"part\" \"Partition Disk(s)\" \
+			\"format\" \"Format Partitions\" \
+			\"swap\" \"Setup Swap\" \
+			\"mount\" \"Mount Paritions\" \
+			\"base\" \"Install Base System\" \
+			\"hostname\" \"Set Hostname\" \
+			\"time\" \"Set Timezone\" \
+			\"locale\" \"Set Locale\" \
+			\"root\" \"Set Root Password\" \
+			\"users\" \"Add User(s)\" \
+			\"boot\" \"Install Bootloader\" \
+			\"drivers\" \"Install Graphics Drivers\" \
+			\"desktop\" \"Install Desktop Environment\" \
+			\"done\" \"Finish Install and Exit Script\" \
+"
 
 mainmenuchoice="default"
 
