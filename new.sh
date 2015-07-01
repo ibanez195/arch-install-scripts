@@ -141,6 +141,8 @@ set_root_passwd(){
 				whiptail --msgbox "Passwords do not match please try again" 15 50
 			elif [[ $pass1 == "" ]]; then
 				whiptail --msgbox "Password cannot be blank please try again" 15 50
+			else
+				arch-chroot /mnt echo "root:$pass1" | chpasswd
 			fi
 
 		done
@@ -167,6 +169,8 @@ add_user(){
 					whiptail --msgbox "Passwords do no match please try again" 15 50
 				elif [[ $pass1 == "" ]]; then
 					whiptail --msgbox "Password cannot be blank please try again" 15 50
+				else
+					arch-chroot /mnt echo "$user:$pass1" | chpasswd
 				fi
 			done
 			
