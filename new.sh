@@ -142,7 +142,10 @@ set_root_passwd(){
 			elif [[ $pass1 == "" ]]; then
 				whiptail --msgbox "Password cannot be blank please try again" 15 50
 			else
-				arch-chroot /mnt echo "root:$pass1" | chpasswd
+				echo "echo \"root:$pass1\" | chpasswd" > /mnt/changeroot.sh
+				arch-chroot /mnt chmod +x changeroot.sh
+				arch-chroot /mnt ./changeroot.sh
+				arch-chroot /mnt rm changeroot.sh
 			fi
 
 		done
@@ -170,7 +173,10 @@ add_user(){
 				elif [[ $pass1 == "" ]]; then
 					whiptail --msgbox "Password cannot be blank please try again" 15 50
 				else
-					arch-chroot /mnt echo "$user:$pass1" | chpasswd
+					echo "echo \"$user:$pass1\" | chpasswd" > /mnt/changepass.sh
+					arch-chroot /mnt chmod +x changepass.sh
+					arch-chroot /mnt ./changepass.sh
+					arch-chroot /mnt rm changepass.sh
 				fi
 			done
 			
