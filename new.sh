@@ -2,6 +2,10 @@
 
 format_disks(){
 
+	if [[ ! -z $parts ]]; then
+		get_partitions;
+	fi
+
 	# Generate whiptail menu command for partition formatting
 	partmenu="whiptail --menu --noitem \"Pick a partition to format\" 20 50 10"
 	for x in $parts; do
@@ -13,7 +17,7 @@ format_disks(){
 	partmenuchoice=$(eval $partmenu 3>&1 1>&2 2>&3)
 	
 	while [[ $partmenuchoice != "done" && $partmenuchoice != "" ]]; do
-			fs=$(whiptail --menu --noitem "How would you like to format $partmenuchoice?" 10 50 5 "ext2" "" "ext3" "" "ext4" "" "vfat" "" "xfs" "" 3>&1 1>&2 2>&3)
+			fs=$(whiptail --menu --noitem "How would you like to format $partmenuchoice?" 20 50 10 "ext2" "" "ext3" "" "ext4" "" "vfat" "" "xfs" "" 3>&1 1>&2 2>&3)
 			eval "mkfs.$fs $partmenuchoice"
 			partmenuchoice=$(eval $partmenu 3>&1 1>&2 2>&3)
 	done
@@ -38,6 +42,10 @@ setup_swap(){
 }
 
 mount_partitions(){
+
+	if [[ ! -z $parts ]]; then
+		get_partitions;
+	fi
 
 	# Generate partition mounting menu
 	mountmenu="whiptail --menu --noitem \"Pick a partition to mount\" 20 50 10"
@@ -125,15 +133,13 @@ set_locale(){
 set_root_passwd(){
 		pass1=""
 		pass2=" "
-		while [[ $pass1 != $pass2 || $pass1 = "" ]]; do
+		while [[ $pass1 != $pass2 || $pass1 == "" ]]; do
 			pass1=$(whiptail --passwordbox "Enter the password you wish to use for root" 15 50 3>&1 1>&2 2>&3)
 			pass2=$(whiptail --passwordbox "Enter the password again" 15 50 3>&1 1>&2 2>&3)
 
 			if [[ $pass1 != $pass2 ]]; then
 				whiptail --msgbox "Passwords do not match please try again" 15 50
-			fi
-
-			if [[ $pass1 == "" ]]; then
+			elif [[ $pass1 == "" ]]; then
 				whiptail --msgbox "Password cannot be blank please try again" 15 50
 			fi
 
@@ -142,18 +148,51 @@ set_root_passwd(){
 
 add_user(){
 		user=$(whiptail --inputbox "Enter a new username" 15 50 3>&1 1>&2 2>&3)
-		groups=$(whiptail --inputbox "Enter any secondary groups you would like the new user to be in" 15 50 3>&1 1>&2 2>&3)
+		groups=$(whiptail --inputbox "Enter any secondary groups you would like the new user to be in, seperated by comma" 15 50 3>&1 1>&2 2>&3)
 
-		if [[ $groups != "" ]]; then
-				arch-chroot /mnt useradd -m -G $groups $user
-		else
-				arch-chroot /mnt useradd -m $user
+		if [[ $user != "" ]]; then
+			if [[ $groups != "" ]]; then
+					arch-chroot /mnt useradd -m -G $groups $user
+			else
+					arch-chroot /mnt useradd -m $user
+			fi
+
+			pass1="default1"
+			pass2="default2"
+
+			while [[ $pass1 != $pass2 || $pass1 == "" ]]; do
+				pass1=$(whiptail --menu "Please enter a password for user $user" 15 50 3>&1 1>&2 2>&3)
+				pass2=$(whiptail --menu "Please enter again" 15 50 3>&1 1>&2 2>&3)
+				if [[ $pass1 != $pass2 ]]; then
+					whiptail --msgbox "Passwords do no match please try again" 15 50
+				elif [[ $pass1 == "" ]]; then
+					whiptail --msgbox "Password cannot be blank please try again" 15 50
+				fi
+			done
+			
 		fi
 }
 
-#install_bootloader(){}
-#install_drivers(){}
-#install_desktop(){}
+# TODO: add options for GRUB and such
+install_bootloader(){
+	arch-chroot /mnt pacman -S syslinux
+	arch-chroot /mnt syslinux-install_update -i -a -m
+}
+
+# TODO: add options for other drivers
+install_drivers(){
+	arch-chroot /mnt pacman -S xf86-video-intel
+}
+
+# TODO: add options for other desktops
+install_desktop(){
+	arch-chroot /mnt pacman -S xorg-server xorg-server-utils xorg-xinit xorg-twm xorg-xclock xterm
+}
+
+get_partitions(){
+	# Obtain list of disk partitions
+	parts=$(fdisk -l | grep -e "^/dev/" | awk '{print $1}');
+}
 
 #TODO: clean up main menu command definition
 
@@ -177,39 +216,36 @@ mainmenu="$mainmenu \"done\" \"Finish Install and Exit Script\""
 mainmenuchoice="default"
 
 while [[ $mainmenuchoice != "done" && $mainmenuchoice != "" ]]; do
-		mainmenuchoice=$(eval $mainmenu 3>&1 1>&2 2>&3)
-		
-		case $mainmenuchoice in
+	mainmenuchoice=$(eval $mainmenu 3>&1 1>&2 2>&3)
 
-		"part")
-				cfdisk
-				
-				# Obtain list of disk partitions
-				parts=$(fdisk -l | grep -e "^/dev/" | awk '{print $1}');;
+	case $mainmenuchoice in
 
-		"format")
-				format_disks;;
-		"swap")
-				setup_swap;;
-		"mount")
-				mount_partitions;;
-		"base")
-				pacstrap /mnt base libnewt sudo;;
-		"hostname")
-				set_hostname;;
-		"time")
-				set_timezone;;
-		"locale")
-				set_locale;;
-		"root")
-				set_root_passwd;;
-		"users")
-				add_user;;
-		"boot")
-				install_bootloader;;
-		"drivers")
-				install_drivers;;
-		"desktop")
-				install_desktop;;
-		esac
+	"part")
+		cfdisk
+		get_partitions;;
+	"format")
+		format_disks;;
+	"swap")
+		setup_swap;;
+	"mount")
+		mount_partitions;;
+	"base")
+		pacstrap /mnt base libnewt sudo;;
+	"hostname")
+		set_hostname;;
+	"time")
+		set_timezone;;
+	"locale")
+		set_locale;;
+	"root")
+		set_root_passwd;;
+	"users")
+		add_user;;
+	"boot")
+		install_bootloader;;
+	"drivers")
+		install_drivers;;
+	"desktop")
+		install_desktop;;
+	esac
 done
