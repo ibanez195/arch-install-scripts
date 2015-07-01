@@ -189,9 +189,19 @@ install_bootloader(){
 	arch-chroot /mnt syslinux-install_update -i -a -m
 }
 
-# TODO: add options for other drivers
 install_drivers(){
-	arch-chroot /mnt pacman -S xf86-video-intel
+	drivermenu="whiptail --menu --notags \"Select your video driver\" 15 50 6 \
+											\"xf86-video-ati\" \"ati\" \
+											\"xf86-video-intel\" \"intel\" \
+											\"xf86-video-nouveau\" \"nouveau\" \
+											\"nvidia\" \"nvidia\" \
+											\"nvidia-340xx\" \"nvidia-340xx\" \
+											\"nvidia-304xx\" \"nvidia-304xx\" \
+	"
+	driver=$(eval $drivermenu 3>&1 1>&2 2>&3)
+	if [[ $driver != "" ]]; then
+		arch-chroot /mnt pacman -S $driver
+	fi
 }
 
 # TODO: add options for other desktops
