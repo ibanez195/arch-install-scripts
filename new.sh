@@ -240,7 +240,8 @@ while [[ $mainmenuchoice != "done" && $mainmenuchoice != "" ]]; do
 	"mount")
 		mount_partitions;;
 	"base")
-		pacstrap /mnt base libnewt sudo;;
+		pacstrap /mnt base sudo
+		genfstab -p /mnt >> /mnt/etc/fstab;;
 	"hostname")
 		set_hostname;;
 	"time")
@@ -257,5 +258,7 @@ while [[ $mainmenuchoice != "done" && $mainmenuchoice != "" ]]; do
 		install_drivers;;
 	"desktop")
 		install_desktop;;
+	"done")
+		arch-chroot /mnt mkinitcpio -p linux;;
 	esac
 done
