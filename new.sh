@@ -1,36 +1,29 @@
 #!/bin/bash
 
-# Obtain list of disk partitions
-parts=$(fdisk -l | grep -e "^/dev/" | awk '{print $1}')
-let partcount=$(echo $parts | wc -w)
-
 format_disks(){
 
 	# Generate whiptail menu command for partition formatting
-	partmenu="whiptail --menu --noitem \"Pick a partition to format\" 15 50 $partcount"
+	partmenu="whiptail --menu --noitem \"Pick a partition to format\" 25 50 $partcount"
 	for x in $parts; do
 			partmenu="$partmenu \"$x\" \"\""
 	done
 	partmenu="$partmenu \"done\" \"\""
 
 	# Ask user for formatting preferences until done or cancel are selected
-	menuchoice=$(eval $partmenu 3>&1 1>&2 2>&3)
+	partmenuchoice=$(eval $partmenu 3>&1 1>&2 2>&3)
 	
-	while [[ $menuchoice != "done" ]]; do
-			if [[ $menuchoice = "" ]]; then
-					echo "Install aborted by user"
-					exit 0
-			fi
-			fs=$(whiptail --menu --noitem "How would you like to format $menuchoice?" 10 50 5 "ext2" "" "ext3" "" "ext4" "" "vfat" "" "xfs" "" 3>&1 1>&2 2>&3)
-			eval "mkfs.$fs $menuchoice"
-			menuchoice=$(eval $partmenu 3>&1 1>&2 2>&3)
+	while [[ $partmenuchoice != "done" && $partmenuchoice != "" ]]; do
+			fs=$(whiptail --menu --noitem "How would you like to format $partmenuchoice?" 10 50 5 "ext2" "" "ext3" "" "ext4" "" "vfat" "" "xfs" "" 3>&1 1>&2 2>&3)
+			eval "mkfs.$fs $partmenuchoice"
+			partmenuchoice=$(eval $partmenu 3>&1 1>&2 2>&3)
 	done
 }
+
 
 setup_swap(){
 
 	# Generate swap menu command
-	swapmenu="whiptail --menu --noitem \"Pick a partition to use as swap\" 15 50 $partcount"
+	swapmenu="whiptail --menu --noitem \"Pick a partition to use as swap\" 25 50 $partcount"
 	for x in $parts; do
 			swapmenu="$swapmenu \"$x\" \"\""
 	done
@@ -38,11 +31,7 @@ setup_swap(){
 	
 	# Format swap partition if present
 	swapmenuchoice=$(eval $swapmenu 3>&1 1>&2 2>&3)
-	if [[ $swapmenuchoice != "done" ]]; then
-			if [[ $swapmenuchoice = "" ]]; then
-					echo "Install aborted by user"
-					exit 0
-			fi
+	if [[ $swapmenuchoice != "done" && $swapmenuchoie != "" ]]; then
 			mkswap $swapmenuchoice
 			swapon $swapmenuchoice
 	fi
@@ -51,7 +40,7 @@ setup_swap(){
 mount_partitions(){
 
 	# Generate partition mounting menu
-	mountmenu="whiptail --menu --noitem \"Pick a partition to mount\" 15 50 $partcount"
+	mountmenu="whiptail --menu --noitem \"Pick a partition to mount\" 25 50 $partcount"
 	for x in $parts; do
 			mountmenu="$mountmenu \"$x\" \"\""
 	done
@@ -116,7 +105,12 @@ while [[ $mainmenuchoice != "done" && $mainmenuchoice != "" ]]; do
 		case $mainmenuchoice in
 
 		"part")
-				cfdisk;;
+				cfdisk
+				
+				# Obtain list of disk partitions
+				parts=$(fdisk -l | grep -e "^/dev/" | awk '{print $1}')
+				let partcount=$(echo $parts | wc -w);;
+
 		"format")
 				format_disks;;
 		"swap")
