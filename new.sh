@@ -3,7 +3,7 @@
 format_disks(){
 
 	# Generate whiptail menu command for partition formatting
-	partmenu="whiptail --menu --noitem \"Pick a partition to format\" 20 50 $partcount"
+	partmenu="whiptail --menu --noitem \"Pick a partition to format\" 20 50 10"
 	for x in $parts; do
 			partmenu="$partmenu \"$x\" \"\""
 	done
@@ -23,7 +23,7 @@ format_disks(){
 setup_swap(){
 
 	# Generate swap menu command
-	swapmenu="whiptail --menu --noitem \"Pick a partition to use as swap\" 20 50 $partcount"
+	swapmenu="whiptail --menu --noitem \"Pick a partition to use as swap\" 20 50 10"
 	for x in $parts; do
 			swapmenu="$swapmenu \"$x\" \"\""
 	done
@@ -40,7 +40,7 @@ setup_swap(){
 mount_partitions(){
 
 	# Generate partition mounting menu
-	mountmenu="whiptail --menu --noitem \"Pick a partition to mount\" 20 50 $partcount"
+	mountmenu="whiptail --menu --noitem \"Pick a partition to mount\" 20 50 10"
 	for x in $parts; do
 			mountmenu="$mountmenu \"$x\" \"\""
 	done
@@ -80,7 +80,9 @@ set_timezone(){
 		timemenu="whiptail --menu \"Select a region\" 25 50 15"
 
 		for region in $(ls /usr/share/zoneinfo | xargs); do
-			timemenu="$timemenu \"$region\" \"\""
+			if [[ -d /usr/share/zoneinfo/$region ]]; then
+				timemenu="$timemenu \"$region\" \"\""
+			fi
 		done
 
 		region=$(eval $timemenu 3>&1 1>&2 2>&3)	
@@ -93,8 +95,21 @@ set_timezone(){
 			done
 
 			zone=$(eval $submenu 3>&1 1>&2 2>&3)
+
 			# if user did not cancel set timezone
 			if [[ $zone != "" ]]; then
+				# if this is a directory there is a subzone
+				if [[ -d /usr/share/zoneinfo/$region/$zone ]]; then
+					subzonemenu="whiptail --menu \"Select a subzone\" 25 50 15"
+					for subzone in $(ls /usr/share/zoneinfo/$region/$zone/ | xargs); do
+						subzonemenu="$subzonemenu \"$subzone\" \"\""
+					done
+					subzone=$(eval $subzonemenu 3>&1 1>&2 2>&3)
+					if [[ $subzone != "" ]]; then
+						ln -sf /usr/share/zoneinfo/$region/$zone/$subzone /etc/localtime
+					fi
+				fi
+			else # there is no subzone
 				arch-chroot /mnt ln -sf /usr/share/zoneinfo/$region/$zone /etc/localtime
 			fi
 		fi
@@ -170,9 +185,7 @@ while [[ $mainmenuchoice != "done" && $mainmenuchoice != "" ]]; do
 				cfdisk
 				
 				# Obtain list of disk partitions
-				parts=$(fdisk -l | grep -e "^/dev/" | awk '{print $1}')
-				let partcount=$(echo $parts | wc -w)
-				let partcount=$partcount+1;;
+				parts=$(fdisk -l | grep -e "^/dev/" | awk '{print $1}');;
 
 		"format")
 				format_disks;;
