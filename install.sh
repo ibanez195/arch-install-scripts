@@ -192,7 +192,7 @@ install_bootloader(){
 	bootchoice=$(eval $bootmenu 3>&1 1>&2 2>&3)
 
 	if [[ $bootchoice != "" ]]; then
-		if [[ $bootchoice == "syslinux"]]; then
+		if [[ $bootchoice == "syslinux" ]]; then
 			arch-chroot /mnt pacman -S syslinux
 			arch-chroot /mnt syslinux-install_update -i -a -m
 			whiptail --msgbox "Please confirm that the syslinux installation chose the correct root partition"
@@ -234,6 +234,7 @@ install_desktop(){
 	arch-chroot /mnt pacman -S xorg-server xorg-server-utils xorg-xinit xorg-twm xorg-xclock xterm
 }
 
+# TODO: makepkg will not let you build as root, find a way around this
 install_helper(){
 	whiptail --msgbox "Note: Installation of an AUR helper requires installation of the base-devel package" 15 50
 	helpermenu="whiptail --menu --notag \"Select a AUR helper to install\" 15 50 5 \
