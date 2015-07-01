@@ -183,10 +183,35 @@ add_user(){
 		fi
 }
 
-# TODO: add options for GRUB and such
+# TODO: add options for UEFI bootloaders
 install_bootloader(){
-	arch-chroot /mnt pacman -S syslinux
-	arch-chroot /mnt syslinux-install_update -i -a -m
+	bootmenu="whiptail --menu --notags \"Select the bootloader you wish to use\" 15 50 5 \
+									\"syslinux\" \"Syslinux\" \
+									\"grub\" \"GRUB\" \
+	"
+	bootchoice=$(eval $bootmenu 3>&1 1>&2 2>&3)
+
+	if [[ $bootchoice != "" ]]; then
+		if [[ $bootchoice == "syslinux"]]; then
+			arch-chroot /mnt pacman -S syslinux
+			arch-chroot /mnt syslinux-install_update -i -a -m
+			whiptail --msgbox "Please confirm that the syslinux installation chose the correct root partition"
+			nano /boot/syslinux/syslinux.cfg
+		elif [[ $bootchoice == "grub" ]]; then
+			arch-chroot /mnt pacman -S grub
+			diskmenu="whiptail --menu --noitem "Please select the disk on which you want to install GRUB" 15 50 5"
+
+			for disk in $(ls /dev | grep -e "^sd.$" | xargs); do
+				diskmenu="$diskmenu \"/dev/$disk\" \"\""
+			done
+
+			disk=$(eval $diskmenu 3>&1 1>&2 2>&3)
+			if [[ $disk != "" ]]; then
+				arch-chroot /mnt grub-install --target=i386-pc --recheck --debug $disk
+				grub-mkconfig -o /boot/grub/grub.cfg
+			fi
+		fi
+	fi
 }
 
 install_drivers(){
