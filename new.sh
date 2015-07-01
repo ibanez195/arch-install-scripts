@@ -69,7 +69,12 @@ mount_partitions(){
 			mountmenuchoice=$(eval $mountmenu 3>&1 1>&2 2>&3)
 	done
 }
-#set_hostname(){}
+
+set_hostname(){
+		hostname=$(whiptail --inputbox "Please enter a hostname for the new system" 10 50 3>&1 1>&2 2>&3)
+		echo $hostname > /mnt/etc/hostname
+}
+
 #set_timezone(){}
 #set_locale(){}
 #set_root_passwd(){}
