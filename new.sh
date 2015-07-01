@@ -149,7 +149,8 @@ while [[ $mainmenuchoice != "done" && $mainmenuchoice != "" ]]; do
 				
 				# Obtain list of disk partitions
 				parts=$(fdisk -l | grep -e "^/dev/" | awk '{print $1}')
-				let partcount=$(echo $parts | wc -w);;
+				let partcount=$(echo $parts | wc -w)
+				let partcount=$partcount+1;;
 
 		"format")
 				format_disks;;
