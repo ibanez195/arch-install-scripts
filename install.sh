@@ -57,24 +57,18 @@ mount_partitions(){
 	# Mount disk partitions
 	mountmenuchoice=$(eval $mountmenu 3>&1 1>&2 2>&3)
 	
-	while [[ $mountmenuchoice != "done" ]]; do
-			if [[ $mountmenuchoice = "" ]]; then
-					echo "Install aborted by user"
-					exit 0
-			fi
-	
+	while [[ $mountmenuchoice != "done" && $mountmenuchoice != "" ]]; do
 			location=$(whiptail --inputbox "Where would you like to mount $mountmenuchoice?" 10 50 3>&1 1>&2 2>&3)
 	
-			if [[ $location = "" ]]; then
-					echo "Install aborted by user"
-					exit 0
+			if [[ $location != "" ]]; then
+				if [ ! -d "/mnt/$location" ]; then
+						mkdir /mnt/$location
+				fi
+
+				mount $mountmenuchoice /mnt/$location
+				mountmenuchoice=$(eval $mountmenu 3>&1 1>&2 2>&3)
 			fi
 	
-			if [ ! -d "/mnt/$location" ]; then
-					mkdir /mnt/$location
-			fi
-			mount $mountmenuchoice /mnt/$location
-			mountmenuchoice=$(eval $mountmenu 3>&1 1>&2 2>&3)
 	done
 }
 
@@ -123,6 +117,7 @@ set_timezone(){
 		fi
 }
 
+# TODO: figure out why locale is not being set correctly
 set_locale(){
 		whiptail --msgbox "Uncomment the locale you wish to use in /etc/locale.gen" 15 50
 		arch-chroot /mnt vi /etc/locale.gen
