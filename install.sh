@@ -130,7 +130,7 @@ set_locale(){
 				# uncomment said line
 				sed -i"" "$line s/#//" /mnt/etc/locale.gen
 				arch-chroot /mnt locale-gen
-				echo $(grep -e "^[^#]" /mnt/etc/locale.gen | awk '{print $1}') > /mnt/etc/locale.conf
+				echo "LANG=$(grep -e "^[^#]" /mnt/etc/locale.gen | awk '{print $1}')" > /mnt/etc/locale.conf
 		fi
 }
 
