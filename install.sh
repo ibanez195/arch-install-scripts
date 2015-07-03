@@ -121,7 +121,7 @@ set_locale(){
 		localemenu="whiptail --menu --noitem \"Please select the locale you want to use\" 25 50 15"
 		# TODO: this loop is splitting locales with white space in them. stop it
 		for line in $(seq 24 484); do
-				localemenu="$localemenu \"$(head -n $line /mnt/etc/locale.gen | tail -n 1)\" \"\""
+				localemenu="$localemenu \"$(head -n $line /mnt/etc/locale.gen | tail -n 1 | sed "s/#//")\" \"\""
 		done
 		locale=$(eval $localemenu 3>&1 1>&2 2>&3 | cut -d " " -f 1)
 		if [[ $locale != "" ]]; then
