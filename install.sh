@@ -120,10 +120,10 @@ set_timezone(){
 set_locale(){
 		localemenu="whiptail --menu --noitem \"Please select the locale you want to use\" 25 50 15"
 		# TODO: this loop is splitting locales with white space in them. stop it
-		for locale in $(tail -n /mnt/etc/locale.gen | sed "s/#//g"); do
-				localemenu="$localemenu \"$locale\" \"\""
+		for line in $(seq 24 484); do
+				localemenu="$localemenu \"$(head -n $line /mnt/etc/locale.gen | tail -n 1)\" \"\""
 		done
-		locale=$(eval $localemenu 3>&1 1>&2 2>&3)
+		locale=$(eval $localemenu 3>&1 1>&2 2>&3 | cut -d " " -f 1)
 		if [[ $locale != "" ]]; then
 				# get line number in /etc/locale.gen
 				line=$(grep -n $locale /mnt/etc/locale.gen | cut -d : -f 1 | tail -n 1)
