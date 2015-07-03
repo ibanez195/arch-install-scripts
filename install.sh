@@ -117,10 +117,10 @@ set_timezone(){
 		fi
 }
 
-# TODO: figure out why locale is not being set correctly
 set_locale(){
-		localemenu="whiptail --menu --noitem \"Please select the locale you want to use\" 25 50 450"
-		for locale in $(tail -n /mnt/etc/locale.gen | sed s/#//g | awk '{print $1}'); do
+		localemenu="whiptail --menu --noitem \"Please select the locale you want to use\" 25 50 15"
+		# TODO: this loop is splitting locales with white space in them. stop it
+		for locale in $(tail -n /mnt/etc/locale.gen | sed "s/#//g"); do
 				localemenu="$localemenu \"$locale\" \"\""
 		done
 		locale=$(eval $localemenu 3>&1 1>&2 2>&3)
