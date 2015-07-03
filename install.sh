@@ -119,10 +119,19 @@ set_timezone(){
 
 # TODO: figure out why locale is not being set correctly
 set_locale(){
-		whiptail --msgbox "Uncomment the locale you wish to use in /etc/locale.gen" 15 50
-		arch-chroot /mnt vi /etc/locale.gen
-		arch-chroot /mnt locale-gen
-		arch-chroot /mnt echo $(locale | grep LANG) > /etc/locale.conf
+		localemenu="whiptail --menu --noitem \"Please select the locale you want to use\" 25 50 450"
+		for locale in $(tail -n /mnt/etc/locale.gen | sed s/#//g | awk '{print $1}'); do
+				localemenu="$localemenu \"$locale\" \"\""
+		done
+		locale=$(eval $localemenu 3>&1 1>&2 2>&3)
+		if [[ $locale != "" ]]; then
+				# get line number in /etc/locale.gen
+				line=$(grep -n $locale /mnt/etc/locale.gen | cut -d : -f 1 | tail -n 1)
+				# uncomment said line
+				sed -i"" "$line s/#//" /mnt/etc/locale.gen
+				arch-chroot /mnt locale-gen
+				echo $(grep -e "^[^#]" /mnt/etc/locale.gen | awk '{print $1}') > /mnt/etc/locale.conf
+		fi
 }
 
 set_root_passwd(){
