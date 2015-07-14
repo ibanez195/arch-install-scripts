@@ -35,7 +35,7 @@ setup_swap(){
 	
 	# Format swap partition if present
 	swapmenuchoice=$(eval $swapmenu 3>&1 1>&2 2>&3)
-	if [[ $swapmenuchoice != "done" && $swapmenuchoie != "" ]]; then
+	if [[ $swapmenuchoice != "done" && $swapmenuchoice != "" ]]; then
 			mkswap $swapmenuchoice
 			swapon $swapmenuchoice
 	fi
