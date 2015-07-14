@@ -212,7 +212,7 @@ install_bootloader(){
 			disk=$(eval $diskmenu 3>&1 1>&2 2>&3)
 			if [[ $disk != "" ]]; then
 				arch-chroot /mnt grub-install --target=i386-pc --recheck --debug $disk
-				grub-mkconfig -o /boot/grub/grub.cfg
+				arch-chroot /mnt grub-mkconfig -o /boot/grub/grub.cfg
 			fi
 		fi
 	fi
