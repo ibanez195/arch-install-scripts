@@ -12,3 +12,4 @@ Very much a work in progress
 - Bootloader installation
 - Driver installation
 - DE/WM installation
+- Network setup
