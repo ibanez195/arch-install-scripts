@@ -203,7 +203,7 @@ install_bootloader(){
 			nano /boot/syslinux/syslinux.cfg
 		elif [[ $bootchoice == "grub" ]]; then
 			arch-chroot /mnt pacman -S grub
-			diskmenu="whiptail --menu --noitem "Please select the disk on which you want to install GRUB" 15 50 5"
+			diskmenu="whiptail --menu --noitem \"Please select the disk on which you want to install GRUB\" 15 50 5"
 
 			for disk in $(ls /dev | grep -e "^sd.$" | xargs); do
 				diskmenu="$diskmenu \"/dev/$disk\" \"\""
