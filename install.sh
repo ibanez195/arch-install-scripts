@@ -262,7 +262,7 @@ install_desktop(){
 											\"i3\" \"i3\" \
 											\"xmonad\" \"xmonad\" \
 	"
-	DEorWM=$(whiptail --menu --notags "Would you like to install a DE or a WM?" 10 50 5 "de" "Desktop Environment" "wm" "Window Manager" 3>&1 1>&2 2>&3)
+	DEorWM=$(whiptail --menu --notags "Would you like to install a DE or a WM?" 10 50 2 "de" "Desktop Environment" "wm" "Window Manager" 3>&1 1>&2 2>&3)
 	if [[ $DEorWM != "" ]]; then
 		if [[ $DEorWM == "de" ]]; then
 			menuchoice=$(eval $demenu 3>&1 1>&2 2>&3)
