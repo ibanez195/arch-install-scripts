@@ -236,6 +236,44 @@ install_drivers(){
 # TODO: add options for other desktops
 install_desktop(){
 	arch-chroot /mnt pacman -S xorg-server xorg-server-utils xorg-xinit xorg-twm xorg-xclock xterm
+	demenu="whiptail --menu --notags \"Select the DE you wish to install\" 15 50 9 \
+											\"cinnamon\" \"Cinnamon\" \
+											\"enlightenment\" \"Enlightenment\" \
+											\"gnome\" \"Gnome\" \
+											\"kdebase-workspace\" \"KDE 4\" \
+											\"plasma\" \"KDE 5 Plasma\" \
+											\"lxde\" \"LXDE\" \
+											\"lxqt\" \"LXQt\" \
+											\"mate\" \"MATE\" \
+											\"xfce4\" \"Xfce\" \
+	"
+	wmmenu="whiptail --menu --notags \"Select the WM you wish to install\" 25 50 13 \
+											\"blackbox\" \"Blackbox\" \
+											\"fluxbox\" \"Fluxbox\" \
+											\"openbox\" \"Openbox\"
+											\"fvwm\" \"FVWM\" \
+											\"icewm\" \"iceWM\" \
+											\"jwm\" \"JWM\" \
+											\"windowmaker\" \"Window Maker\" \
+											\"bspwm\" \"Bspwm\" \
+											\"herbstluftwm\" \"Herbstluftwm\" \
+											\"awesome\" \"Awesome\" \
+											\"dwm\" \"dwm\" \
+											\"i3\" \"i3\" \
+											\"xmonad\" \"xmonad\" \
+	"
+	DEorWM=$(whiptail --menu --notags "Would you like to install a DE or a WM?" 10 50 5 "de" "Desktop Environment" "wm" "Window Manager" 3>&1 1>&2 2>&3)
+	if [[ $DEorWM != "" ]]; then
+		if [[ $DEorWM == "de" ]]; then
+			menuchoice=$(eval $demenu 3>&1 1>&2 2>&3)
+		elif [[ $DEorWM == "wm" ]]; then
+			menuchoice=$(eval $wmmenu 3>&1 1>&2 2>&3)
+		fi
+	fi
+
+	if [[ $menuchoice != "" ]]; then
+		arch-chroot /mnt pacman -S $menuchoice
+	fi
 }
 
 # TODO: makepkg will not let you build as root, find a way around this
