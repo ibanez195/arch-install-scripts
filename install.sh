@@ -2,7 +2,7 @@
 
 format_disks(){
 
-	if [[ ! -z $parts ]]; then
+	if [[ -z $parts ]]; then
 		get_partitions;
 	fi
 
@@ -26,7 +26,7 @@ format_disks(){
 
 setup_swap(){
 
-	if [[ ! -z $parts ]]; then
+	if [[ -z $parts ]]; then
 		get_partitions;
 	fi
 
@@ -47,7 +47,7 @@ setup_swap(){
 
 mount_partitions(){
 
-	if [[ ! -z $parts ]]; then
+	if [[ -z $parts ]]; then
 		get_partitions;
 	fi
 
