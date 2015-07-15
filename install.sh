@@ -226,6 +226,7 @@ install_drivers(){
 											\"nvidia\" \"nvidia\" \
 											\"nvidia-340xx\" \"nvidia-340xx\" \
 											\"nvidia-304xx\" \"nvidia-304xx\" \
+											\"virtualbox-guest-utils\" \"virtualbox\" \
 	"
 	driver=$(eval $drivermenu 3>&1 1>&2 2>&3)
 	if [[ $driver != "" ]]; then
