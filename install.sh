@@ -77,6 +77,17 @@ set_hostname(){
 		echo $hostname > /mnt/etc/hostname
 }
 
+setup_network(){
+	dhcp=$(whiptail --yesno "Would you like to use DHCP?" 5 50 3>&1 1>&2 2>&3)
+	if [[ $dhcp == "yes" ]]; then
+		arch-chroot /mnt systemctl enable dhcpcd
+	elif [[ $dhcp == "no" ]]; then
+		#TODO: make setup of static ip possible
+	fi
+
+	fi
+}
+
 set_timezone(){
 		# construct command string for time region
 		timemenu="whiptail --menu \"Select a region\" 25 50 15"
@@ -234,7 +245,6 @@ install_drivers(){
 	fi
 }
 
-# TODO: add options for other desktops
 install_desktop(){
 	arch-chroot /mnt pacman -S xorg-server xorg-server-utils xorg-xinit xorg-twm xorg-xclock xterm
 	demenu="whiptail --menu --notags \"Select the DE you wish to install\" 15 50 9 \
@@ -310,6 +320,7 @@ mainmenu="whiptail --menu --notags \"Arch Install Scripts\" 25 50 15 \
 			\"mount\" \"Mount Paritions\" \
 			\"base\" \"Install Base System\" \
 			\"hostname\" \"Set Hostname\" \
+			\"network\" \"Setup Networking\"
 			\"time\" \"Set Timezone\" \
 			\"locale\" \"Set Locale\" \
 			\"root\" \"Set Root Password\" \
@@ -342,6 +353,8 @@ while [[ $mainmenuchoice != "done" && $mainmenuchoice != "" ]]; do
 		genfstab -p /mnt >> /mnt/etc/fstab;;
 	"hostname")
 		set_hostname;;
+	"network")
+		setup_network;;
 	"time")
 		set_timezone;;
 	"locale")
