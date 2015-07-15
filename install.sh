@@ -82,11 +82,12 @@ set_hostname(){
 }
 
 setup_network(){
-	dhcp=$(whiptail --yesno "Would you like to use DHCP?" 5 50 3>&1 1>&2 2>&3)
+	dhcp=$(whiptail --yesno "Would you like to use DHCP?" 7 31 3>&1 1>&2 2>&3)
 	if [[ $dhcp == "yes" ]]; then
 		arch-chroot /mnt systemctl enable dhcpcd
 	elif [[ $dhcp == "no" ]]; then
 		# TODO: make setup of static ip possible
+		sleep 1
 	fi
 }
 
@@ -247,7 +248,6 @@ install_drivers(){
 }
 
 install_desktop(){
-	arch-chroot /mnt pacman -S xorg-server xorg-server-utils xorg-xinit xorg-twm xorg-xclock xterm
 	demenu="whiptail --menu --notags \"Select the DE you wish to install\" 15 50 9 \
 											\"cinnamon\" \"Cinnamon\" \
 											\"enlightenment\" \"Enlightenment\" \
@@ -284,6 +284,7 @@ install_desktop(){
 	fi
 
 	if [[ $menuchoice != "" ]]; then
+		arch-chroot /mnt pacman -S xorg-server xorg-server-utils xorg-xinit xorg-twm xorg-xclock xterm
 		arch-chroot /mnt pacman -S $menuchoice
 	fi
 }
