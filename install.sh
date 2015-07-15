@@ -3,11 +3,14 @@
 format_disks(){
 
 	if [[ -z $parts ]]; then
-		get_partitions;
+		get_partitions
+		let partcount=$(echo $parts | wc -w)
+		let partcount+=1
 	fi
 
+
 	# Generate whiptail menu command for partition formatting
-	partmenu="whiptail --menu --noitem \"Pick a partition to format\" 20 50 10"
+	partmenu="whiptail --menu --noitem \"Pick a partition to format\" 15 40 $partcount"
 	for x in $parts; do
 			partmenu="$partmenu \"$x\" \"\""
 	done
@@ -17,8 +20,10 @@ format_disks(){
 	partmenuchoice=$(eval $partmenu 3>&1 1>&2 2>&3)
 	
 	while [[ $partmenuchoice != "done" && $partmenuchoice != "" ]]; do
-			fs=$(whiptail --menu --noitem "How would you like to format $partmenuchoice?" 20 50 10 "ext2" "" "ext3" "" "ext4" "" "vfat" "" "xfs" "" 3>&1 1>&2 2>&3)
-			eval "mkfs.$fs $partmenuchoice"
+			fs=$(whiptail --menu --noitem "How would you like to format $partmenuchoice?" 13 45 5 "ext2" "" "ext3" "" "ext4" "" "vfat" "" "xfs" "" 3>&1 1>&2 2>&3)
+			if [[ $fs != "" ]]; then
+				eval "mkfs.$fs $partmenuchoice"
+			fi
 			partmenuchoice=$(eval $partmenu 3>&1 1>&2 2>&3)
 	done
 }
@@ -27,11 +32,13 @@ format_disks(){
 setup_swap(){
 
 	if [[ -z $parts ]]; then
-		get_partitions;
+		get_partitions
+		let partcount=$(echo $parts | wc -w)
+		let partcount+=1
 	fi
 
 	# Generate swap menu command
-	swapmenu="whiptail --menu --noitem \"Pick a partition to use as swap\" 20 50 10"
+	swapmenu="whiptail --menu --noitem \"Pick a partition to use as swap\" 15 35 $partcount"
 	for x in $parts; do
 			swapmenu="$swapmenu \"$x\" \"\""
 	done
@@ -48,11 +55,13 @@ setup_swap(){
 mount_partitions(){
 
 	if [[ -z $parts ]]; then
-		get_partitions;
+		get_partitions
+		let partcount=$(echo $parts | wc -w)
+		let partcount+=1
 	fi
 
 	# Generate partition mounting menu
-	mountmenu="whiptail --menu --noitem \"Pick a partition to mount\" 20 50 10"
+	mountmenu="whiptail --menu --noitem \"Pick a partition to mount\" 15 40 $partcount"
 	for x in $parts; do
 			mountmenu="$mountmenu \"$x\" \"\""
 	done
@@ -62,7 +71,7 @@ mount_partitions(){
 	mountmenuchoice=$(eval $mountmenu 3>&1 1>&2 2>&3)
 	
 	while [[ $mountmenuchoice != "done" && $mountmenuchoice != "" ]]; do
-			location=$(whiptail --inputbox "Where would you like to mount $mountmenuchoice?" 10 50 3>&1 1>&2 2>&3)
+			location=$(whiptail --inputbox "Where would you like to mount $mountmenuchoice?" 10 45 3>&1 1>&2 2>&3)
 	
 			if [[ $location != "" ]]; then
 				if [ ! -d "/mnt/$location" ]; then
@@ -70,14 +79,14 @@ mount_partitions(){
 				fi
 
 				mount $mountmenuchoice /mnt/$location
-				mountmenuchoice=$(eval $mountmenu 3>&1 1>&2 2>&3)
 			fi
+			mountmenuchoice=$(eval $mountmenu 3>&1 1>&2 2>&3)
 	
 	done
 }
 
 set_hostname(){
-		hostname=$(whiptail --inputbox "Please enter a hostname for the new system" 10 50 3>&1 1>&2 2>&3)
+		hostname=$(whiptail --inputbox "Please enter a hostname for the new system" 10 46 3>&1 1>&2 2>&3)
 		echo $hostname > /mnt/etc/hostname
 }
 
@@ -147,18 +156,21 @@ set_locale(){
 		fi
 }
 
+# TODO: fix the cancel logic so that blank entries dont cancel but button presses do
 set_root_passwd(){
-		pass1=""
-		pass2=" "
-		while [[ $pass1 != $pass2 || $pass1 == "" ]]; do
-			pass1=$(whiptail --passwordbox "Enter the password you wish to use for root" 15 50 3>&1 1>&2 2>&3)
-			pass2=$(whiptail --passwordbox "Enter the password again" 15 50 3>&1 1>&2 2>&3)
+		pass1=" "
+		pass2="  "
+		while [[ $pass1 != $pass2  && ! -z $pass1 && ! -z $pass2 ]]; do
+			pass1=$(whiptail --passwordbox "Enter the password you wish to use for root" 10 50 3>&1 1>&2 2>&3)
+			pass2=$(whiptail --passwordbox "Enter the password again" 10 50 3>&1 1>&2 2>&3)
 
-			if [[ $pass1 != $pass2 ]]; then
-				whiptail --msgbox "Passwords do not match please try again" 15 50
-			elif [[ $pass1 == "" ]]; then
-				whiptail --msgbox "Password cannot be blank please try again" 15 50
-			else
+			if [[ $pass1 != $pass2 && ! -z $pass1 &&  ! -z $pass2 ]]; then
+				whiptail --msgbox "Passwords do not match please try again" 10 50
+			elif [[ $pass1 == "" && $pass2 == "" ]]; then
+				whiptail --msgbox "Password cannot be blank please try again" 10 50
+				pass1=" "
+				pass2="  "
+			elif [[ $pass1 == $pass2 ]]; then
 				echo "echo \"root:$pass1\" | chpasswd" > /mnt/changeroot.sh
 				arch-chroot /mnt chmod +x changeroot.sh
 				arch-chroot /mnt ./changeroot.sh
@@ -168,11 +180,12 @@ set_root_passwd(){
 		done
 }
 
+# TODO: update password flow control to satisfy same problems as set_root_passwd
 add_user(){
-		user=$(whiptail --inputbox "Enter a new username" 15 50 3>&1 1>&2 2>&3)
-		groups=$(whiptail --inputbox "Enter any secondary groups you would like the new user to be in, seperated by comma" 15 50 3>&1 1>&2 2>&3)
+		user=$(whiptail --inputbox "Enter a new username" 10 50 3>&1 1>&2 2>&3)
 
 		if [[ $user != "" ]]; then
+			groups=$(whiptail --inputbox "Enter any secondary groups you would like the new user to be in, seperated by comma" 15 50 3>&1 1>&2 2>&3)
 			if [[ $groups != "" ]]; then
 					arch-chroot /mnt useradd -m -G $groups $user
 			else
@@ -183,12 +196,12 @@ add_user(){
 			pass2="default2"
 
 			while [[ $pass1 != $pass2 || $pass1 == "" ]]; do
-				pass1=$(whiptail --passwordbox "Please enter a password for user $user" 15 50 3>&1 1>&2 2>&3)
-				pass2=$(whiptail --passwordbox "Please enter again" 15 50 3>&1 1>&2 2>&3)
+				pass1=$(whiptail --passwordbox "Please enter a password for user $user" 10 50 3>&1 1>&2 2>&3)
+				pass2=$(whiptail --passwordbox "Please enter again" 10 50 3>&1 1>&2 2>&3)
 				if [[ $pass1 != $pass2 ]]; then
-					whiptail --msgbox "Passwords do no match please try again" 15 50
+					whiptail --msgbox "Passwords do no match please try again" 10 50
 				elif [[ $pass1 == "" ]]; then
-					whiptail --msgbox "Password cannot be blank please try again" 15 50
+					whiptail --msgbox "Password cannot be blank please try again" 10 50
 				else
 					echo "echo \"$user:$pass1\" | chpasswd" > /mnt/changepass.sh
 					arch-chroot /mnt chmod +x changepass.sh
@@ -202,7 +215,7 @@ add_user(){
 
 # TODO: add options for UEFI bootloaders
 install_bootloader(){
-	bootmenu="whiptail --menu --notags \"Select the bootloader you wish to use\" 15 50 5 \
+	bootmenu="whiptail --menu --notags \"Select the bootloader you wish to use\" 10 50 2 \
 									\"syslinux\" \"Syslinux\" \
 									\"grub\" \"GRUB\" \
 	"
@@ -213,14 +226,16 @@ install_bootloader(){
 			arch-chroot /mnt pacman -S syslinux
 			arch-chroot /mnt syslinux-install_update -i -a -m
 			whiptail --msgbox "Please confirm that the syslinux installation chose the correct root partition"
-			nano /boot/syslinux/syslinux.cfg
+			vim /mnt/boot/syslinux/syslinux.cfg
 		elif [[ $bootchoice == "grub" ]]; then
 			arch-chroot /mnt pacman -S grub
-			diskmenu="whiptail --menu --noitem \"Please select the disk on which you want to install GRUB\" 15 50 5"
 
 			for disk in $(ls /dev | grep -e "^sd.$" | xargs); do
 				diskmenu="$diskmenu \"/dev/$disk\" \"\""
 			done
+
+			diskmenu="whiptail --menu --noitem \"Please select the disk on which you want to install GRUB\" 15 50 5"
+
 
 			disk=$(eval $diskmenu 3>&1 1>&2 2>&3)
 			if [[ $disk != "" ]]; then
@@ -232,7 +247,7 @@ install_bootloader(){
 }
 
 install_drivers(){
-	drivermenu="whiptail --menu --notags \"Select your video driver\" 15 50 6 \
+	drivermenu="whiptail --menu --notags \"Select your video driver\" 15 50 7 \
 											\"xf86-video-ati\" \"ati\" \
 											\"xf86-video-intel\" \"intel\" \
 											\"xf86-video-nouveau\" \"nouveau\" \
@@ -248,7 +263,7 @@ install_drivers(){
 }
 
 install_desktop(){
-	demenu="whiptail --menu --notags \"Select the DE you wish to install\" 15 50 9 \
+	demenu="whiptail --menu --notags \"Select the DE you wish to install\" 17 50 9 \
 											\"cinnamon\" \"Cinnamon\" \
 											\"enlightenment\" \"Enlightenment\" \
 											\"gnome\" \"Gnome\" \
@@ -259,7 +274,7 @@ install_desktop(){
 											\"mate\" \"MATE\" \
 											\"xfce4\" \"Xfce\" \
 	"
-	wmmenu="whiptail --menu --notags \"Select the WM you wish to install\" 25 50 13 \
+	wmmenu="whiptail --menu --notags \"Select the WM you wish to install\" 21 50 13 \
 											\"blackbox\" \"Blackbox\" \
 											\"fluxbox\" \"Fluxbox\" \
 											\"openbox\" \"Openbox\"
@@ -274,7 +289,7 @@ install_desktop(){
 											\"i3\" \"i3\" \
 											\"xmonad\" \"xmonad\" \
 	"
-	DEorWM=$(whiptail --menu --notags "Would you like to install a DE or a WM?" 10 50 2 "de" "Desktop Environment" "wm" "Window Manager" 3>&1 1>&2 2>&3)
+	DEorWM=$(whiptail --menu --notags "Would you like to install a DE or a WM?" 10 43 2 "de" "Desktop Environment" "wm" "Window Manager" 3>&1 1>&2 2>&3)
 	if [[ $DEorWM != "" ]]; then
 		if [[ $DEorWM == "de" ]]; then
 			menuchoice=$(eval $demenu 3>&1 1>&2 2>&3)
@@ -315,7 +330,7 @@ get_partitions(){
 }
 
 # Create string of command for main menu
-mainmenu="whiptail --menu --notags \"Arch Install Scripts\" 25 50 15 \
+mainmenu="whiptail --menu --notags \"Arch Install Scripts\" 25 50 16 \
 			\"part\" \"Partition Disk(s)\" \
 			\"format\" \"Format Partitions\" \
 			\"swap\" \"Setup Swap\" \
