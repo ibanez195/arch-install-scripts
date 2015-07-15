@@ -26,6 +26,10 @@ format_disks(){
 
 setup_swap(){
 
+	if [[ ! -z $parts ]]; then
+		get_partitions;
+	fi
+
 	# Generate swap menu command
 	swapmenu="whiptail --menu --noitem \"Pick a partition to use as swap\" 20 50 10"
 	for x in $parts; do
@@ -82,9 +86,7 @@ setup_network(){
 	if [[ $dhcp == "yes" ]]; then
 		arch-chroot /mnt systemctl enable dhcpcd
 	elif [[ $dhcp == "no" ]]; then
-		#TODO: make setup of static ip possible
-	fi
-
+		# TODO: make setup of static ip possible
 	fi
 }
 
@@ -130,7 +132,6 @@ set_timezone(){
 
 set_locale(){
 		localemenu="whiptail --menu --noitem \"Please select the locale you want to use\" 25 50 15"
-		# TODO: this loop is splitting locales with white space in them. stop it
 		for line in $(seq 24 484); do
 				localemenu="$localemenu \"$(head -n $line /mnt/etc/locale.gen | tail -n 1 | sed "s/#//")\" \"\""
 		done
