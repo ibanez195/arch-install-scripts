@@ -20,7 +20,7 @@ format_disks(){
 	partmenuchoice=$(eval $partmenu 3>&1 1>&2 2>&3)
 	
 	while [[ $partmenuchoice != "done" && $partmenuchoice != "" ]]; do
-			fs=$(whiptail --menu --noitem "How would you like to format $partmenuchoice?" 13 45 5 "ext2" "" "ext3" "" "ext4" "" "vfat" "" "xfs" "" 3>&1 1>&2 2>&3)
+			fs=$(whiptail --menu --noitem "How would you like to format $partmenuchoice?" 13 45 5 "ext2" "" "ext3" "" "ext4" "" "vfat" "" "xfs" "" "btrfs" "" 3>&1 1>&2 2>&3)
 			if [[ $fs != "" ]]; then
 				eval "mkfs.$fs $partmenuchoice"
 			fi
