@@ -358,7 +358,6 @@ while [[ $mainmenuchoice != "done" && $mainmenuchoice != "" ]]; do
 
 	"part")
 		cfdisk
-		get_partitions;;
 	"format")
 		format_disks;;
 	"swap")
