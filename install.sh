@@ -362,7 +362,7 @@ while [[ $mainmenuchoice != "done" && $mainmenuchoice != "" ]]; do
 	case $mainmenuchoice in
 
 	"part")
-		cfdisk
+		cfdisk;;
 	"format")
 		format_disks;;
 	"swap")
