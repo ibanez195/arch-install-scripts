@@ -74,11 +74,12 @@ mount_partitions(){
 			location=$(whiptail --inputbox "Where would you like to mount $mountmenuchoice?" 10 45 3>&1 1>&2 2>&3)
 	
 			if [[ $location != "" ]]; then
-				if [ $location[1,4] == "/mnt" ]; then
+				if [ ${location:0:4} == "/mnt" ]; then
 					if [ ! -d $location]; then
 						mkdir $location
 					fi
-					mount $mountmenuchoice $location else
+					mount $mountmenuchoice $location
+				else
 					if [ ! -d "/mnt/$location" ]; then
 						mkdir /mnt/$location
 					fi
