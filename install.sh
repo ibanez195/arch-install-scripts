@@ -310,7 +310,7 @@ install_desktop(){
 	fi
 }
 
-# TODO: make sure sudo -u nobody actually works
+# TODO: make sure sudo -u nobody actually works (Hint: it doesn't)
 install_helper(){
 	whiptail --msgbox "Note: Installation of an AUR helper requires installation of the base-devel package" 15 50
 	helpermenu="whiptail --menu --notag \"Select a AUR helper to install\" 15 50 5 \
@@ -323,10 +323,11 @@ install_helper(){
 	helper=$(eval $helpermenu 3>&1 1>&2 2>&3)
 	if [[ $helper != "" ]]; then
 		pacstrap /mnt base-devel wget
-		arch-chroot /mnt wget https://aur.archlinux.org/packages/$helper[1,2]/$helper/$helper.tar.gz
-		arch-chroot /mnt tar xzf $helper*.tar.gz
-		arch-chroot /mnt sudo -u nobody makepkg $helper/PKGBUILD
-		arch-chroot /mnt pacman -U $helper*.tar.xz
+		mkdir /mnt/home/build
+		chown nobody:nobody /mnt/home/build
+		chmod g+ws /mnt/home/build
+		sudo -u nobody wget -P /mnt/home/build https://aur.archlinux.org/cgit/aur.git/snapshot/"$helper".tar.gz
+		# may have to write a seperate script and copy it over to handle building
 	fi
 }
 
@@ -352,7 +353,7 @@ mainmenu="whiptail --menu --notags \"Arch Install Scripts\" 25 50 16 \
 			\"drivers\" \"Install Graphics Drivers\" \
 			\"desktop\" \"Install Desktop Environment\" \
 			\"helper\" \"Install AUR Helper\"
-			\"done\" \"Finish Install and Exit Script\" \
+			\"done\" \"Make Initial RAM Image and Exit Script\" \
 "
 
 mainmenuchoice="default"
