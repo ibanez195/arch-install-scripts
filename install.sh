@@ -310,7 +310,7 @@ install_desktop(){
 	fi
 }
 
-# TODO: makepkg will not let you build as root, find a way around this
+# TODO: make sure sudo -u nobody actually works
 install_helper(){
 	whiptail --msgbox "Note: Installation of an AUR helper requires installation of the base-devel package" 15 50
 	helpermenu="whiptail --menu --notag \"Select a AUR helper to install\" 15 50 5 \
@@ -325,7 +325,7 @@ install_helper(){
 		pacstrap /mnt base-devel wget
 		arch-chroot /mnt wget https://aur.archlinux.org/packages/$helper[1,2]/$helper/$helper.tar.gz
 		arch-chroot /mnt tar xzf $helper*.tar.gz
-		arch-chroot /mnt makepkg $helper/PKGBUILD
+		arch-chroot /mnt sudo -u nobody makepkg $helper/PKGBUILD
 		arch-chroot /mnt pacman -U $helper*.tar.xz
 	fi
 }
