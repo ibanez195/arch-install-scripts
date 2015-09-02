@@ -327,6 +327,8 @@ install_helper(){
 		chown nobody:nobody /mnt/home/build
 		chmod g+ws /mnt/home/build
 		sudo -u nobody wget -P /mnt/home/build https://aur.archlinux.org/cgit/aur.git/snapshot/"$helper".tar.gz
+		cp helper-install.sh /mnt/home/build
+		arch-chroot /mnt /mnt/home/build/helper-install.sh
 		# may have to write a seperate script and copy it over to handle building
 	fi
 }
