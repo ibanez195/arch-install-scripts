@@ -310,7 +310,7 @@ install_desktop(){
 	fi
 }
 
-# TODO: make sure sudo -u nobody actually works (Hint: it doesn't)
+# TODO: test the alteration of sudoers file
 install_helper(){
 	whiptail --msgbox "Note: Installation of an AUR helper requires installation of the base-devel package" 15 50
 	helpermenu="whiptail --menu --notag \"Select a AUR helper to install\" 15 50 5 \
@@ -328,8 +328,7 @@ install_helper(){
 		chmod g+ws /mnt/home/build
 		sudo -u nobody wget -P /mnt/home/build https://aur.archlinux.org/cgit/aur.git/snapshot/"$helper".tar.gz
 		cp helper-install.sh /mnt/home/build
-		arch-chroot /mnt /mnt/home/build/helper-install.sh
-		# may have to write a seperate script and copy it over to handle building
+		arch-chroot /mnt /mnt/home/build/helper-install.sh $helper
 	fi
 }
 
