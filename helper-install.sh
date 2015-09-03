@@ -3,6 +3,7 @@
 pacman -S base-devel wget
 chown nobody:nobody /home/build
 chmod g+ws /home/build
+cd /home/build
 sed -i "85s/#//g" /etc/sudoers
 usermod -G wheel nobody
 sudo -u nobody wget https://aur.archlinux.org/cgit/aur.git/snapshot/"$1".tar.gz

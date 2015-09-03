@@ -313,7 +313,7 @@ install_desktop(){
 # TODO: test the alteration of sudoers file
 install_helper(){
 	whiptail --msgbox "Note: Installation of an AUR helper requires installation of the base-devel package" 15 50
-	helpermenu="whiptail --menu --notag \"Select a AUR helper to install\" 15 50 5 \
+	helpermenu="whiptail --menu --notags \"Select a AUR helper to install\" 15 50 5 \
 									\"aura\" \"Aura\" \
 									\"autoaur\" \"Autoaur\" \
 									\"cower\" \"Cower\" \
