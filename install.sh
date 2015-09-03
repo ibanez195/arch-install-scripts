@@ -322,13 +322,9 @@ install_helper(){
 	"
 	helper=$(eval $helpermenu 3>&1 1>&2 2>&3)
 	if [[ $helper != "" ]]; then
-		pacstrap /mnt base-devel wget
 		mkdir /mnt/home/build
-		chown nobody:nobody /mnt/home/build
-		chmod g+ws /mnt/home/build
-		sudo -u nobody wget -P /mnt/home/build https://aur.archlinux.org/cgit/aur.git/snapshot/"$helper".tar.gz
 		cp helper-install.sh /mnt/home/build
-		arch-chroot /mnt /mnt/home/build/helper-install.sh $helper
+		arch-chroot /mnt /home/build/helper-install.sh $helper
 	fi
 }
 
