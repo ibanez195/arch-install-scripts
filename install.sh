@@ -97,12 +97,15 @@ set_hostname(){
 }
 
 setup_network(){
+
+	wifi=$(whiptail --yesno "Are you going to use wifi?" 7 31 3>&1 1>&2 2>&3)
+	if [[ $wifi == "yes" ]]; then
+		arch-chroot /mnt pacman -S wpa_supplicant iw dialog
+	fi
+
 	dhcp=$(whiptail --yesno "Would you like to use DHCP?" 7 31 3>&1 1>&2 2>&3)
 	if [[ $dhcp == "yes" ]]; then
 		arch-chroot /mnt systemctl enable dhcpcd
-	elif [[ $dhcp == "no" ]]; then
-		# TODO: make setup of static ip possible
-		sleep 1
 	fi
 }
 
@@ -341,7 +344,7 @@ mainmenu="whiptail --menu --notags \"Arch Install Scripts\" 25 50 16 \
 			\"mount\" \"Mount Paritions\" \
 			\"base\" \"Install Base System\" \
 			\"hostname\" \"Set Hostname\" \
-			\"network\" \"Setup Networking\"
+			\"network\" \"Networking Tools\"
 			\"time\" \"Set Timezone\" \
 			\"locale\" \"Set Locale\" \
 			\"root\" \"Set Root Password\" \
