@@ -222,11 +222,12 @@ add_user(){
 		fi
 }
 
-# TODO: add options for UEFI bootloaders
+# TODO: test UEFI install
 install_bootloader(){
-	bootmenu="whiptail --menu --notags \"Select the bootloader you wish to use\" 10 50 2 \
+	bootmenu="whiptail --menu --notags \"Select the bootloader you wish to use\" 10 50 3 \
 									\"syslinux\" \"Syslinux\" \
 									\"grub\" \"GRUB\" \
+									\"uefi\" \"bootctl(UEFI)\"
 	"
 	bootchoice=$(eval $bootmenu 3>&1 1>&2 2>&3)
 
@@ -251,6 +252,16 @@ install_bootloader(){
 				arch-chroot /mnt grub-install --target=i386-pc --recheck --debug $disk
 				arch-chroot /mnt grub-mkconfig -o /boot/grub/grub.cfg
 			fi
+		elif [[ $bootchoice == "uefi" ]]; then
+			arch-chroot /mnt bootctl install
+			echo "title		Arch Linux" >> /mnt/boot/loader/entries/arch.conf
+			echo "linux		/vmlinuz-linux" >> /mnt/boot/loader/entries/arch.conf
+			echo "initrd	/initramfs-linux.img" >> /mnt/boot/loader/entries/arch.conf
+			echo "options	root=/dev/sda2 rw" >> /mnt/boot/loader/entries/arch.conf
+
+			# this may not be correct
+			echo "timeout 3" >> /mnt/boot/loader/loader.conf
+			echo "default arch" >> /mnt/boot/loader/loader.conf
 		fi
 	fi
 }
@@ -313,7 +324,6 @@ install_desktop(){
 	fi
 }
 
-# TODO: test the alteration of sudoers file
 install_helper(){
 	whiptail --msgbox "Note: Installation of an AUR helper requires installation of the base-devel package" 15 50
 	helpermenu="whiptail --menu --notags \"Select a AUR helper to install\" 15 50 5 \
