@@ -7,9 +7,9 @@ Very much a work in progress
 - Installation of base system
 - Basic settings like hostname/locale/timezone
 - User config
+- Display driver installation
+- DE/WM installation
 
 #Things that are not done:
-- Bootloader installation
-- Driver installation
-- DE/WM installation
+- Bootloader installation(needs UEFI support)
 - Network setup
