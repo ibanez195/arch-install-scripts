@@ -1,6 +1,6 @@
 # arch-install-scripts
 
-Very much a work in progress
+A work in progress
 
 ### Things that are done:
 - Configuration of disk
@@ -12,4 +12,4 @@ Very much a work in progress
 
 ### Things that are not done:
 - Bootloader installation(needs UEFI support)
-- Network setup
+- Static network configuration(Only DHCP right now)
