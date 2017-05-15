@@ -166,6 +166,7 @@ set_locale(){
 }
 
 # TODO: fix the cancel logic so that blank entries dont cancel but button presses do
+# Try to use exit status as a way to check if the cancel button is pressed "$?"
 set_root_passwd(){
 		pass1=" "
 		pass2="  "
